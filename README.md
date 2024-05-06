@@ -4,7 +4,7 @@
 <img src="https://github.com/paolacalle/port_scanners/assets/98432607/026e4b2c-9e47-43cb-a454-2562b2f165e3" width="400" height="400">
 
 ### Overview
-This project involves creating a custom port scanner from scratch. 
+This project involves creating custom port scanners from scratch. 
 
 ### Libraries Used
 We used two python libaries:
