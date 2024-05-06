@@ -30,18 +30,10 @@ Options:
 
 ## The Team + Contributions
 
-<p>
-Larissa
-</p>
-
-<p> 
+#### Larissa
 <img src="https://github.com/paolacalle/port_scanners/assets/98432607/6ea3f94c-7e2e-4b40-afe9-f4d77cf68862" width="200" height="200">
-</p>
 
-<p align = "right">
-Paola
-</p>
 
-<p align="right">  
+#### Paola Calle
 <img src="https://github.com/paolacalle/port_scanners/assets/98432607/096885e3-791d-45f8-afb5-00388e680b2f" width="200" height="200">
-</p>
+
