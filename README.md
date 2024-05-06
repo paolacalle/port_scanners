@@ -17,3 +17,15 @@ We used two python libaries:
 ```bash
 git clone https://github.com/paolacalle/port_scanners
 ```
+
+### Usage
+Run scanner via command line:
+```bash
+python3 port_scanner.py [-options] target
+```
+Options:
+* -mode [connect/syn/udp] - Choose the scanning mode.
+* -order [order/random] - Specify the port scanning order.
+* -ports [all/known] - Decide the range of ports to scan.
+
+### The Team
