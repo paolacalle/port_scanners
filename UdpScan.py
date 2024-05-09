@@ -35,7 +35,7 @@ def scan(ip, ports):
 
 
 def main(order, port, target):
-  ports = gs.runChecks(order, port, target)
+  ports = gs.run_checks(order, port, target)
   results, elapsed = scan(target, ports)
   gs.print_scan_results(target, results, elapsed )
 
