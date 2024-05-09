@@ -40,7 +40,8 @@ def main(mode, order, port, target):
 
     if scan_function:
         results, elapsed = scan_function(target, ports)
-        gs.print_scan_results(target, results, elapsed)
+        connection_protocol = "tcp" if mode != 'udp' else 'udp'
+        gs.print_scan_results(target, results, elapsed, connection_protocol)
     else:
         print("Scan function not found in the module.")
 

@@ -46,7 +46,7 @@ def scan(ip_dst, ports, timeout = .1):
 def main(order, port, target):
   ports = gs.run_checks(order, port, target)
   results, elapsed = scan(target, ports)
-  gs.print_scan_results(target, results, elapsed )
+  gs.print_scan_results(target, results, elapsed, 'udp')
 
 
 if __name__ == '__main__':

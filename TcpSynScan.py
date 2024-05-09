@@ -48,8 +48,7 @@ def scan(ip_dst, ports, timeout = .1):
         else: 
             print("UNKNOWN ISSUE")
             results[port] = "unknown issue"
-            
-    print(response.summary())         
+                 
     print("\n")           
     finished = time.time()
     elapsed = finished - initial #end time

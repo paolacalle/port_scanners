@@ -75,7 +75,7 @@ def run_checks(order, selection, target):
     return get_ports(order, selection)
 
 ### Print Results ###
-def print_scan_results(ip, results, elapsed):
+def print_scan_results(ip, results, elapsed, connection_protocol = 'tcp'):
     """Print the scan results in a formatted table."""
     print(f"Interesting ports on {ip}:")
 
@@ -100,7 +100,7 @@ def print_scan_results(ip, results, elapsed):
                 service = socket.getservbyport(port)
             except OSError:
                 service = 'Unknown'  # Handle ports with no known service
-            print(f"{port}\t{state}\t{service}")
+            print(f"{port}/{connection_protocol}\t{state}\t{service}")
             
     print("\n")
     print(f"Scan done! 1 IP address (1 host up) scanned in {elapsed} seconds")
