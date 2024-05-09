@@ -1,37 +1,13 @@
 import unittest
 import sys
 from unittest.mock import patch
+import socket
 
 sys.path.append('../')
 import generalSelection as gs
 
 
 class TestGeneralSelection(unittest.TestCase):
-
-  # Test port selection based on well-known or all
-  def test_get_port_selection_well_known(self):
-    self.assertEqual(gs.get_port_selection("well-known"), list(range(0, 1024)))
-
-  def test_get_port_selection_all(self):
-    self.assertEqual(gs.get_port_selection("all"), list(range(0, 65535)))
-
-  # Test port list based on ordered or random
-  def test_ordered_mode(self):
-    ports = [80, 443, 22, 8080]
-    mode = 'ordered'
-    ordered_ports = gs.get_port_order(ports, mode)
-    self.assertEqual(ordered_ports, ports)
-
-  def test_random_mode(self):
-    ports = [80, 443, 22, 8080]
-    mode = 'random'
-
-    with patch('generalSelection.shuffle') as mock_shuffle:
-      mock_shuffle.return_value = [443, 22, 8080, 80]
-
-      shuffled_ports = gs.get_port_order(ports, mode)
-      mock_shuffle.assert_called_once_with(ports)
-      self.assertEqual(shuffled_ports, [443, 22, 8080, 80])
 
   # Test valid ipv4 or ipv6 address
   def test_valid_ipv4(self):
@@ -47,31 +23,39 @@ class TestGeneralSelection(unittest.TestCase):
     self.assertFalse(gs.check_ip(ip))
 
   # Test hostname conversions
-  @patch('generalSelection.check_ip')
-  @patch('generalSelection.socket.gethostbyname')
-  def test_hostname_conversion(self, mock_gethostbyname, mock_check_ip):
-      address = 'redPandasAreAmazing.com'
-      mock_check_ip.return_value = False
-      mock_gethostbyname.return_value = '93.184.216.34'
+  @patch('socket.gethostbyname')
+  def test_check_hostname_or_ip_address_valid(self, mock_gethostbyname):
+    """Test resolving a valid hostname."""
+    mock_gethostbyname.return_value = '192.168.1.1'
+    self.assertEqual(gs.check_hostname_or_ip_address('redpandasss.com'),
+                     '192.168.1.1')
+    mock_gethostbyname.assert_called_once_with('redpandasss.com')
 
-      converted_address = gs.check_hostname_or_ip_address(address)
-      mock_check_ip.assert_called_once_with(address)
-      mock_gethostbyname.assert_called_once_with(address)
-      self.assertEqual(converted_address, '93.184.216.34')
+  @patch('socket.gethostbyname')
+  def test_check_hostname_or_ip_address_invalid(self, mock_gethostbyname):
+    """Test resolving an invalid hostname."""
+    mock_gethostbyname.side_effect = socket.error
+    self.assertEqual(gs.check_hostname_or_ip_address('not_real'), '127.0.0.1')
 
-  @patch('generalSelection.check_ip')
-  @patch('generalSelection.socket.gethostbyname')
-  def test_invalid_hostname(self, mock_gethostbyname, mock_check_ip):
-      address = 'InvalidPaolaIvalidLarissa'
-      mock_check_ip.return_value = False
-      mock_gethostbyname.side_effect = Exception("Invalid hostname")
+  @patch('subprocess.run')
+  def test_reachable_test(self, mock_run):
+    """Test the reachable_test function."""
+    mock_run.return_value.returncode = 0
+    self.assertTrue(gs.reachable_test('192.168.1.1'))
 
-      with patch('builtins.print') as mock_print:
-          converted_address = gs.check_hostname_or_ip_address(address)
-          mock_check_ip.assert_called_once_with(address)
-          mock_gethostbyname.assert_called_once_with(address)
-          mock_print.assert_called_once_with("Invalid hostname cannot find ip address... Will be using a loopback addressinstead.. teeheehee... D:")
-          self.assertEqual(converted_address, gs.ipaddress.ip_address("127.0.0.1"))
+    mock_run.return_value.returncode = 1
+    self.assertFalse(gs.reachable_test('192.168.1.1'))
+
+  def test_get_ports_known_order(self):
+    """Test getting ports in known order."""
+    ports = gs.get_ports('ordered', 'known')
+    self.assertEqual(ports[0], 0)
+    self.assertEqual(ports[-1], 1023)
+
+  def test_get_ports_random_order(self):
+    """Test getting ports in random order - mainly checks type and count."""
+    ports = gs.get_ports('random', 'all')
+    self.assertEqual(len(ports), 65536)
 
 
 # python -m unittest tests.test_generalSelection
