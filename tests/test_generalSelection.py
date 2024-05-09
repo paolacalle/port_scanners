@@ -5,8 +5,6 @@ import socket
 
 sys.path.append('../')
 import generalSelection as gs
-
-
 class TestGeneralSelection(unittest.TestCase):
 
   # Test valid ipv4 or ipv6 address
