@@ -7,7 +7,7 @@ import sys
 def scan(ip_dst, ports, timeout = .1):
     print(f"Starting TCP SYN Scan at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
     results = {}
-    initial=time.time()
+    initial = time.time()
     for port in ports:
         sys.stdout.write(".")  # dot for each port being scanned
         sys.stdout.flush()  # ensure the dot is displayed immediately
@@ -39,8 +39,8 @@ def scan(ip_dst, ports, timeout = .1):
             if int(response[ICMP].type) == 3 and int(response[ICMP].code) in [1, 2, 3, 9, 10, 13]:
                 results[port] = "filtered"
     print("\n")           
-    finished= time.time()
-    elapsed= finished-initial #end time
+    finished = time.time()
+    elapsed = finished - initial #end time
 
     return results, elapsed
 
