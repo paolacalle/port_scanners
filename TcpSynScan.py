@@ -20,32 +20,36 @@ def scan(ip_dst, ports, timeout = .1):
             
             if response is None:
                 results[port] = "filtered"
-            continue
+                continue
         
         if response.haslayer(TCP):
-            if response[TCP].flags & 0x12:  # SYN/ACK
+            
+            if response[TCP].flags == "SA":  # SYN/ACK
                 results[port] = "open"
                 
                 # send RST to close the half-open connection
                 rst_pkt = IP(dst=ip_dst) / TCP(dport=port, flags="R")
                 send(rst_pkt, verbose=0)
+                continue
                 
-            elif response[TCP].flags & 0x14:  # RST/ACK
+            elif response[TCP].flags == 'RA':  # RST/ACK
                 results[port] = "closed"
-            
-            else: 
-                results[port] = "tcp issue"
+                continue
         
-        elif response.haslayer(ICMP):
+        if response.haslayer(ICMP):
             # specific ICMP messages can also indicate a filtered port
             if int(response[ICMP].type) == 3 and int(response[ICMP].code) in [1, 2, 3, 9, 10, 13]:
                 results[port] = "filtered"
+                
             else: 
+                print("ICMP ISSUE")
                 results[port] = "ICMP issue"
         
         else: 
+            print("UNKNOWN ISSUE")
             results[port] = "unknown issue"
-                
+            
+    print(response.summary())         
     print("\n")           
     finished = time.time()
     elapsed = finished - initial #end time

@@ -31,12 +31,14 @@ def scan(ip_dst, ports, timeout = .1):
                 results[current_port] = "filtered"
                 continue
 
-        if response.haslayer(TCP) and (response[TCP].flags & 0x04):  # RST flag
+        if response.haslayer(TCP) and (response[TCP].flags == "RA"):  # RST flag
             results[current_port] = "unfiltered"
+            continue
             
-        elif response.haslayer(ICMP):
+        if response.haslayer(ICMP):
             # specific ICMP messages can also indicate a filtered port
             icmp = response.getlayer(ICMP)
+            
             if int(icmp.type) == 3 and int(icmp.code) in [1, 2, 3, 9, 10, 13]:
                 results[current_port] = "filtered"
                 

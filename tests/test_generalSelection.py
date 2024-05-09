@@ -55,7 +55,6 @@ class TestGeneralSelection(unittest.TestCase):
     ports = gs.get_ports('random', 'all')
     self.assertEqual(len(ports), 65536)
 
-
 # python -m unittest tests.test_generalSelection
 if __name__ == '__main__':
   unittest.main()

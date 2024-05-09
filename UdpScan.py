@@ -25,6 +25,7 @@ def scan(ip_dst, ports, timeout = .1):
     
     if response.haslayer(UDP):
         results[port] = "open"
+        
     elif response.haslayer(ICMP):
         # specific ICMP messages can also indicate a filtered port
         if int(response[ICMP].type) == 3:

@@ -29,7 +29,7 @@ def reachable_test(ip):
     try:
         output = (process.run(ping_command, capture_output=True))
         if output.returncode == 0:
-            print("Ping code == 0")
+            print(f"Host {ip} is up: Ping code is 0")
             return True
         elif output.returncode < 0:
             print("Ping code < 0")
