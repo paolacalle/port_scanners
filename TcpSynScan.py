@@ -34,10 +34,10 @@ def scan(ip_dst, ports, timeout = .1):
                 results[port] = "closed"
         
         elif response.haslayer(ICMP):
-          
             # specific ICMP messages can also indicate a filtered port
             if int(response[ICMP].type) == 3 and int(response[ICMP].code) in [1, 2, 3, 9, 10, 13]:
                 results[port] = "filtered"
+                
     print("\n")           
     finished = time.time()
     elapsed = finished - initial #end time

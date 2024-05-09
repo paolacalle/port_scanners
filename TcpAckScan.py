@@ -1,8 +1,8 @@
-import socket
-import time 
+import time
 import argparse
+from scapy.all import IP, TCP, sr1,  ICMP, send
 import generalSelection as gs
-import scapy.all as scapy 
+import sys
 
 """
 TCP ACK Scanning: This scan only sends the ACK flag. "When scanning 
@@ -13,47 +13,44 @@ respond, or send certain ICMP error messages back, are labeled filtered."
 Resource: https://nmap.org/book/scan-methods-ack-scan.html
 """
 
-def scan(ip_dst, ports):
+def scan(ip_dst, ports, timeout = .1):
+    print(f"Starting TCP ACK Scan at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
+    initial = time.time()
+    results = {}
 
-  print("Starting TCP ACK Scan")
-  initial=time.time()
-  #time start
-  results={}
+    for current_port in ports:
+        sys.stdout.write(".")  # dot for each port being scanned
+        sys.stdout.flush()  # ensure the dot is displayed immediately
+        ack_pack = IP(dst = ip_dst) / TCP(dport=current_port, flags="A")
+        response = sr1(ack_pack, timeout=timeout, verbose=0)  # Adjusted timeout
 
-  ip= scapy.IP(dst= ip_dst) #create IP Packet
-  for current_port in ports:
-    results[current_port] =''
-    print(current_port)
-    syn_pack = ip/scapy.TCP( dport=current_port, flags="A")
-    reply=scapy.sr1(syn_pack, timeout= .001, verbose=0)
+        if response is None:
+            response = sr1(ack_pack, timeout=.2, verbose=0)  # Retransmission with longer timeout
+            
+            if response is None:
+                results[current_port] = "filtered"
+                continue
 
-    if reply == None:
-      reply = scapy.sr1(syn_pack, timeout= .01, verbose=0) #try again 
-      print("Retransmission")
-      results[current_port] +="retransmission"
+        if response.haslayer(TCP) and (response[TCP].flags & 0x04):  # RST flag
+            results[current_port] = "unfiltered"
+            
+        elif response.haslayer(ICMP):
+            # specific ICMP messages can also indicate a filtered port
+            icmp = response.getlayer(ICMP)
+            if int(icmp.type) == 3 and int(icmp.code) in [1, 2, 3, 9, 10, 13]:
+                results[current_port] = "filtered"
+                
+            else:
+                results[current_port] = "ICMP Issue"
+                
+        else:
+            results[current_port] = "unknown Issue"
 
-    if reply == None:  #no response = filtered
-        results[current_port] = "Filtered"
+    print("\n") 
+    finished = time.time()
+    elapsed = finished - initial  # end time
+    return results, elapsed
 
-    elif reply[scapy.TCP].flags == "R": ##Reset =unfiltered
-        results[current_port] = "unfiltered"  + str(reply[scapy.TCP].flags)
-
-    elif reply.haslayer(scapy.ICMP): #ICMP error = filtered
-      icmp = reply.getlayer(scapy.ICMP)
-
-      if icmp.type == 3 and icmp.code in [1, 2, 3, 9, 10, 13]:
-        results[current_port]= "filtered"  + str(reply[scapy.TCP].flags)
-      else:
-        results[current_port] = "\tissue"  + str(reply[scapy.TCP].flags)
-
-    else: 
-
-      results[current_port] +="\tissue2 " + str(reply[scapy.TCP].flags)
-
-  finished= time.time()
-  elapsed= finished-initial #end time
-
-  return results, elapsed 
 
 
 def main(order, port, target):
