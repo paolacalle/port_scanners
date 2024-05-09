@@ -32,11 +32,19 @@ def scan(ip_dst, ports, timeout = .1):
                 
             elif response[TCP].flags & 0x14:  # RST/ACK
                 results[port] = "closed"
+            
+            else: 
+                results[port] = "tcp issue"
         
         elif response.haslayer(ICMP):
             # specific ICMP messages can also indicate a filtered port
             if int(response[ICMP].type) == 3 and int(response[ICMP].code) in [1, 2, 3, 9, 10, 13]:
                 results[port] = "filtered"
+            else: 
+                results[port] = "ICMP issue"
+        
+        else: 
+            results[port] = "unknown issue"
                 
     print("\n")           
     finished = time.time()

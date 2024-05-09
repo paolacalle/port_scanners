@@ -1,36 +1,44 @@
-import socket
-import argparse
-import generalSelection as gs
-import scapy.all as scapy
 import time
+import argparse
+from scapy.all import IP, UDP, sr1,  ICMP, send
+import generalSelection as gs
+import sys
 
-
-def scan(ip, ports):
+def scan(ip_dst, ports, timeout = .1):
+  print(f"Starting UDP Scan at {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
   results = {}
-  ip_layer = scapy.IP(dst=ip)
   start_time = time.time()
 
   for port in ports:
+    sys.stdout.write(".")  # dot for each port being scanned
+    sys.stdout.flush()  # ensure the dot is displayed immediately
+    pkt = IP(dst = ip_dst) / UDP(dport = port)
+    response = sr1(pkt, timeout = timeout, verbose=0)
 
-    packet = ip_layer / scapy.UDP(dport=port)
-
-    reply = scapy.sr1(packet, timeout=.25, verbose=0)
-
-
-    if reply is None:
-      results[port]="Filtered"
-    elif reply.haslayer(scapy.ICMP):
-      icmp = reply.getlayer(scapy.ICMP)
-      if icmp.type == 3 and icmp.code == 3:
-        results[port]="closed"
-        print("closed")
-      elif icmp.type == 3 and icmp.code in [1, 2, 9, 10, 13]:
-        results[port]="filtered"
-
+    if response is None:
+      # no response after timeout, re-check to confirm it's filtered or open
+      response = sr1(pkt, timeout=timeout, verbose=0)
+      
+      if response is None:
+        results[port] = "open|filtered"
+      continue
+    
+    if response.haslayer(UDP):
+        results[port] = "open"
+    elif response.haslayer(ICMP):
+        # specific ICMP messages can also indicate a filtered port
+        if int(response[ICMP].type) == 3:
+          if int(response[ICMP].code) == 3:
+            results[port] = "closed"
+          elif int(response[ICMP].code) in [1, 2, 9, 10, 13]:
+            results[port] = "filtered"
+          else: 
+            results[port] = "ICMP Issue"
     else:
-        results[port]="Success"
+        results[port] = "unknown Issue"
+        
+  print("\n")
   elapsed = time.time() - start_time  
-
   return results, elapsed
 
 
