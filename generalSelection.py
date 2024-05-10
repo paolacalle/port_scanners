@@ -102,5 +102,4 @@ def print_scan_results(ip, results, elapsed, connection_protocol = 'tcp'):
                 service = 'Unknown'  # Handle ports with no known service
             print(f"{port}/{connection_protocol}\t{state}\t{service}")
             
-    print("\n")
     print(f"Scan done! 1 IP address (1 host up) scanned in {elapsed} seconds")

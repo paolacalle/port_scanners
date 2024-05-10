@@ -21,10 +21,11 @@ def scan(ip_dst, ports, timeout = .1):
             if response is None:
                 results[port] = "filtered"
                 continue
+            
         
         if response.haslayer(TCP):
             
-            if response[TCP].flags == "SA":  # SYN/ACK
+            if response[TCP].flags == 'SA':  # SYN/ACK
                 results[port] = "open"
                 
                 # send RST to close the half-open connection
@@ -48,7 +49,7 @@ def scan(ip_dst, ports, timeout = .1):
         else: 
             print("UNKNOWN ISSUE")
             results[port] = "unknown issue"
-                 
+       
     print("\n")           
     finished = time.time()
     elapsed = finished - initial #end time

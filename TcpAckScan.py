@@ -18,7 +18,7 @@ def scan(ip_dst, ports, timeout = .1):
     initial = time.time()
     results = {}
 
-    for current_port in ports:
+    for current_port in [21, 22, 53, 80, 443, 8080, 8443]:
         sys.stdout.write(".")  # dot for each port being scanned
         sys.stdout.flush()  # ensure the dot is displayed immediately
         ack_pack = IP(dst = ip_dst) / TCP(dport=current_port, flags="A")
@@ -31,7 +31,7 @@ def scan(ip_dst, ports, timeout = .1):
                 results[current_port] = "filtered"
                 continue
 
-        if response.haslayer(TCP) and (response[TCP].flags == "RA"):  # RST flag
+        if response.haslayer(TCP) and (response[TCP].flags == 'R'):  # RST flag
             results[current_port] = "unfiltered"
             continue
             
@@ -47,7 +47,7 @@ def scan(ip_dst, ports, timeout = .1):
                 
         else:
             results[current_port] = "unknown Issue"
-
+    print(results)
     print("\n") 
     finished = time.time()
     elapsed = finished - initial  # end time
