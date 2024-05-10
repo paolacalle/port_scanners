@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 import time
 import argparse
 from scapy.all import IP, UDP, sr1,  ICMP, send

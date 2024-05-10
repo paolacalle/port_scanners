@@ -1,7 +1,11 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 from random import shuffle
 import ipaddress
 import socket
 import subprocess as process
+
 
 ##### Step 1: Checking if Target is Valid Format #####
 def check_ip(ip):
@@ -17,7 +21,24 @@ def check_hostname_or_ip_address(address):
     if check_ip(address):
         return address
     try:
-        return socket.gethostbyname(address)
+        # all IP addresses associated with the address
+        ip_addresses = socket.getaddrinfo(address, None)
+        unique_ips = set()
+        for addr in ip_addresses:
+            ip = addr[4][0]
+            unique_ips.add(ip)
+        
+        # primary IP address used by the system for this address
+        ip_used = socket.gethostbyname(address)
+        
+        # filter and display additional IPs that are not the primary one used
+        if len(unique_ips) > 1:
+            other_ips = [ip for ip in unique_ips if ip != ip_used]
+            if other_ips:
+                print(f"Other addresses for {address} (not scanned): {', '.join(other_ips)}")
+        
+        return ip_used
+      
     except socket.error:
         print("Invalid hostname or IP address. Using loopback address as fallback.")
         return "127.0.0.1"
